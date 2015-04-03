@@ -1,5 +1,66 @@
 import sys
 
+def nix(items, it):
+    """ Pick complementary item from a properly sorted iterable of items.
+
+        Args:
+            items: iterable of items sorted in such a way that related (but
+                   complementary) items are adjacent
+            item: single item from the list
+        Returns:
+            The complementary item of `it` (an element adjacent to it)
+        Raises:
+            TypeError: if `items` is not iterable
+            ValueError: if `it` is not in `items`
+
+        Given a list of items, where related but complementary items are
+        adjacent, and an item that is inside that list, produce the
+        complementary item. Effectively, this means the previous item if `it`
+        is found at an odd index and the next item otherwise.
+    """
+
+    odd = lambda x: x % 2 != 0
+
+    items = list(items)
+
+    i = items.index(it)
+    if odd(i):
+        return items[i-1]
+    else:
+        return items[i+1]
+
+class Function(object):
+    _perceiving = ('N', 'S')
+    _judging = ('T', 'F')
+    _orientations = ('i', 'e')
+
+    def __init__(self, f):
+        if (len(f) != 2 or
+            f[0].upper() not in Function._perceiving + Function._judging or
+            f[1].lower() not in Function._orientations):
+            raise ValueError("Not a valid Myers-Briggs function.")
+
+        self.type = f[0].upper()
+        self.orientation = f[1].lower()
+
+    def __invert__(self):
+        if self.type in Function._perceiving:
+            t = nix(Function._perceiving, self.type)
+        else:
+            t = nix(Function._judging, self.type)
+        o = nix(Function._orientations, self.orientation)
+        return Function(t + o)
+
+    def __neg__(self):
+        o = nix(Function._orientations, self.orientation)
+        return Function(self.type + o)
+
+    def __str__(self):
+        return self.type + self.orientation
+
+    def __repr__(self):
+        return 'Function("{}{}")'.format(self.type, self.orientation)
+
 class Type(object):
     _order = ('E', 'I', 'S', 'N', 'F', 'T', 'J', 'P')
 
