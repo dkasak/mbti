@@ -1,7 +1,7 @@
 import sys
 
 def nix(items, it):
-    """ Pick complementary item from a properly sorted iterable of items.
+    """ Pick complementary item from an appropriately sorted iterable of items.
 
         Args:
             items: iterable of items sorted in such a way that related (but
