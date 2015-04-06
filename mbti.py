@@ -83,8 +83,12 @@ class Type(object):
         self.type = normalize(t)
 
     def complement(self):
-        c = map(Type.negate, self.type)
-        return Type(''.join(c))
+        """ Creates the complement type (the type with all functions inverted)."""
+        return Type([~f for f in self.primary])
+
+    def __invert__(self):
+        """ Same as Type.complement. """
+        return self.complement()
 
     @staticmethod
     def from_functions(fs):
