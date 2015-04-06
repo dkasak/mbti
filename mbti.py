@@ -96,9 +96,9 @@ class Type(object):
         return disposition + perceiving + judging + strategy
 
     def __str__(self):
-        return "{type} -> {functions}".format(
+        return "{type} -> [{functions}]".format(
                 type=self.type,
-                functions=self.functions())
+                functions=", ".join(map(str, self.primary)))
 
     def __repr__(self):
         return 'mbti.Type("{}")'.format(self.type)
