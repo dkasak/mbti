@@ -105,7 +105,7 @@ class Type(object):
                 functions=", ".join(map(str, self.primary)))
 
     def __repr__(self):
-        return 'mbti.Type("{}")'.format(self.type)
+        return 'Type("{}")'.format(self.type)
 
     @property
     def primary(self):
