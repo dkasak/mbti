@@ -30,29 +30,29 @@ def nix(items, it):
         return items[i+1]
 
 class Function(object):
-    _perceiving = ('N', 'S')
-    _judging = ('T', 'F')
-    _orientations = ('i', 'e')
+    perceiving = ('N', 'S')
+    judging = ('T', 'F')
+    orientations = ('i', 'e')
 
     def __init__(self, f):
         if (len(f) != 2 or
-            f[0].upper() not in Function._perceiving + Function._judging or
-            f[1].lower() not in Function._orientations):
+            f[0].upper() not in Function.perceiving + Function.judging or
+            f[1].lower() not in Function.orientations):
             raise ValueError("Not a valid Myers-Briggs function.")
 
         self.type = f[0].upper()
         self.orientation = f[1].lower()
 
     def __invert__(self):
-        if self.type in Function._perceiving:
-            t = nix(Function._perceiving, self.type)
+        if self.type in Function.perceiving:
+            t = nix(Function.perceiving, self.type)
         else:
-            t = nix(Function._judging, self.type)
-        o = nix(Function._orientations, self.orientation)
+            t = nix(Function.judging, self.type)
+        o = nix(Function.orientations, self.orientation)
         return Function(t + o)
 
     def __neg__(self):
-        o = nix(Function._orientations, self.orientation)
+        o = nix(Function.orientations, self.orientation)
         return Function(self.type + o)
 
     def __str__(self):
@@ -62,26 +62,38 @@ class Function(object):
         return 'Function("{}{}")'.format(self.type, self.orientation)
 
 class Type(object):
-    _order = ('E', 'I', 'S', 'N', 'F', 'T', 'J', 'P')
-
     def __init__(self, t):
-        if len(t.strip("EISNFTPJ")) != 0:
-            raise ValueError("Bad letter in type.")
         if len(t) != 4:
-            raise ValueError("Types must contain four letters.")
-        self.type = ''.join(sorted(t.upper(), key=lambda x: Type._order.index(x)))
+            raise ValueError("Argument must be either a MBTI type or an "
+                             "iterable of four MBTI functions.")
+        try:
+            if sorted([x.type for x in t]) != (
+                    sorted(Function.perceiving + Function.judging)):
+                raise ValueError("Passed functions do not make a MBTI type.")
+
+            t = Type.from_functions(t)
+        except (TypeError, AttributeError):
+            if len(t.strip("EISNFTPJ")) != 0:
+                raise ValueError("Bad letter in type.")
+
+        def normalize(t):
+            letters = ('E', 'I', 'S', 'N', 'F', 'T', 'J', 'P')
+            return ''.join(sorted(t.upper(), key=lambda x: letters.index(x)))
+
+        self.type = normalize(t)
 
     def complement(self):
         c = map(Type.negate, self.type)
         return Type(''.join(c))
 
     @staticmethod
-    def negate(t):
-        i = Type._order.index(t)
-        if i % 2 == 1:
-            return Type._order[i - 1]
-        else:
-            return Type._order[i + 1]
+    def from_functions(fs):
+        disposition = fs[0].orientation.upper()
+        perceiving = fs[0].type if fs[0].type in Function.perceiving else fs[1].type
+        judging = fs[0].type if fs[0].type in Function.judging else fs[1].type
+        public = fs[0].type if fs[0].orientation == 'e' else fs[1].type
+        strategy = 'P' if public == perceiving else 'J'
+        return disposition + perceiving + judging + strategy
 
     def __str__(self):
         return "{type} -> {functions}".format(
