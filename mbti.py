@@ -103,22 +103,27 @@ class Type(object):
     def __repr__(self):
         return 'mbti.Type("{}")'.format(self.type)
 
-    def functions(self):
+    @property
+    def primary(self):
         disposition = self.type[0]
         perceiving = self.type[1]
         judging = self.type[2]
         public = perceiving if self.type[3] == 'P' else judging
         private = judging if public == perceiving else perceiving
 
+        public = Function(public + 'e')
+        private = Function(private + 'i')
+
         if disposition == "E":
-            fs = [public, private, Type.negate(private), Type.negate(public)]
+            fs = [public, private, ~private, ~public]
         else:
-            fs = [private, public, Type.negate(public), Type.negate(private)]
+            fs = [private, public, ~public, ~private]
 
-        ds = 2 * [disposition, Type.negate(disposition)]
-        ds = [d.lower() for d in ds]
+        return fs
 
-        return list(map(''.join, zip(fs, ds)))
+    @property
+    def shadow(self):
+        return [-f for f in self.primary]
 
 def main():
     if len(sys.argv) != 2:
